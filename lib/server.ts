@@ -1,4 +1,3 @@
-import {cert,getApps,initializeApp} from 'firebase-admin/app';
-import {getFirestore} from 'firebase-admin/firestore';
-export function database(){if(!getApps().length){const raw=process.env.FIREBASE_SERVICE_ACCOUNT_JSON;if(!raw)throw new Error('Firebase 서버 설정이 필요합니다. README를 확인해 주세요.');initializeApp({credential:cert(JSON.parse(raw))});}return getFirestore();}
+import {cert,getApps,initializeApp} from 'firebase-admin/app';import {getFirestore} from 'firebase-admin/firestore';
+export function database(){if(!getApps().length){const raw=process.env.FIREBASE_SERVICE_ACCOUNT_JSON;if(!raw?.trim())throw new Error('Vercel 환경변수 FIREBASE_SERVICE_ACCOUNT_JSON이 없습니다. Production에 등록한 뒤 재배포해 주세요.');let account;try{account=JSON.parse(raw)}catch{throw new Error('Firebase 환경변수의 JSON 형식이 올바르지 않습니다. 다운로드한 파일 전체를 복사해 주세요.')}if(!account.project_id||!account.client_email||!account.private_key)throw new Error('Firebase 서비스 계정 JSON에 project_id, client_email, private_key가 필요합니다.');initializeApp({credential:cert(account)});}return getFirestore();}
 export function fail(e:unknown){return Response.json({error:e instanceof Error?e.message:'연결을 확인해 주세요.'},{status:500});}

@@ -1,0 +1,32 @@
+export type SharedWork={eco:string,found:string[],bins:Record<string,string>,reasons:Record<string,string>,first:Record<string,string>|null,reflection:string,submitted:boolean,chat?:{id:string,author:string,text:string,at:string}[]};
+export type Operation={id:string,type:string,item?:string,value?:string,author?:string};
+export type Envelope={draft:SharedWork,submission:SharedWork|null,receipts:string[],revision:number};
+export const initial=(group:number):Envelope=>({draft:{eco:['sea','sea','river','river','forest','forest'][group-1],found:[],bins:{},reasons:{},first:null,reflection:'',submitted:false,chat:[]},submission:null,receipts:[],revision:0});
+export function apply(d:SharedWork,op:Operation):SharedWork{
+ const w=structuredClone(d);w.chat??=[];
+ if(op.type==='find'&&op.item&&!w.found.includes(op.item)){w.found.push(op.item);w.submitted=false}
+ if(op.type==='classify'&&op.item){w.bins[op.item]=op.value!;w.submitted=false}
+ if(op.type==='reason'&&op.item){w.reasons[op.item]=op.value||'';w.submitted=false}
+ if(op.type==='reflection'){w.reflection=op.value||'';w.submitted=false}
+ if(op.type==='first'&&!w.first)w.first={...w.bins};
+ if(op.type==='chat'&&!w.chat.some(m=>m.id===op.id)){w.chat.push({id:op.id,author:op.author||'모둠원',text:op.value||'',at:new Date().toISOString()});w.chat=w.chat.slice(-100)}
+ if(op.type==='submit')w.submitted=true;
+ return w;
+}
+export function commit(e:Envelope,ops:Operation[],validIds:string[]):Envelope{
+ const next=structuredClone(e);
+ for(const op of ops){if(next.receipts.includes(op.id))continue;
+  if(!['find','classify','reason','reflection','first','chat','submit'].includes(op.type))throw new Error('지원하지 않는 작업입니다.');
+  if(['find','classify','reason'].includes(op.type)&&!validIds.includes(op.item||''))throw new Error('구성요소를 확인해 주세요.');
+  if(op.type==='classify'&&(!['bio','non','unsure'].includes(op.value||'')||!next.draft.found.includes(op.item!)))throw new Error('조사한 요소를 분류해 주세요.');
+  if((op.value?.length||0)>(op.type==='reflection'?1000:op.type==='chat'?500:300))throw new Error('입력 내용을 조금 줄여 주세요.');
+  if(op.type==='submit'){
+   if(next.draft.found.length<6||!next.draft.first||!next.draft.reflection.trim()||next.draft.found.some(id=>!['bio','non'].includes(next.draft.bins[id])))throw new Error('첫 분류와 탐구 정리를 마무리해 주세요.');
+  }
+  next.draft=apply(next.draft,op);
+  if(op.type==='submit')next.submission={...structuredClone(next.draft),chat:[]};
+  next.receipts.push(op.id);
+ }
+ next.receipts=next.receipts.slice(-300);next.revision++;return next;
+}
+export function decode(p:any,group:number):Envelope{if(p?.draft)return p;if(p?.eco)return {...initial(group),draft:{...p,chat:p.chat||[]},submission:p.submitted?p:null};return initial(group)}
