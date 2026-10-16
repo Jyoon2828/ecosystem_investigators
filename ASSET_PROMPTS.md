@@ -10,3 +10,5 @@
 - 확대 카드: photographic contact sheet, exactly six columns and three rows, equal tiles, no gutters or labels. Row 1 seagull / octopus / brown kelp / coral / marine fish / mallard; row 2 grey heron / cattail / freshwater fish / filamentous algae / water strider / oak; row 3 red fox / red squirrel / ant / purple aster / mushrooms / ferns. Clear living subjects in natural habitat with realistic anatomy.
 
 앱 에셋 경로: public/assets/sea.webp, river.webp, forest.webp, atlas.webp, item-0.webp~item-17.webp. 일부 타일은 예비 에셋입니다.
+
+추가 제작: 내장 이미지 생성 도구로 3열 2행 자연 사진 접촉 시트를 생성했습니다. 프롬프트: realistic educational photography, equal tiles, no gutters or text; gray river stones, golden sand macro, dark crumbly soil, clear rippling freshwater, white cloth blowing in invisible air under blue sky, sunlight through forest canopy. 6개 타일을 item-18.webp~item-23.webp로 분리했습니다. 공기 카드는 간접 관찰임을 표시합니다.
