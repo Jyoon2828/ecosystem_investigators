@@ -1,0 +1,2 @@
+import {database} from './server';
+export async function activeRoom(){const db=database();const active=(await db.collection('ecoSettings').doc('active').get()).data();if(active?.room){const snap=await db.collection('ecoRooms').doc(active.room).get();if(snap.exists)return {id:snap.id,...snap.data()} as any;}const latest=await db.collection('ecoRooms').orderBy('created','desc').limit(1).get();if(latest.empty)throw new Error('아직 열린 수업이 없습니다. 선생님이 먼저 수업을 열어 주세요.');return {id:latest.docs[0].id,...latest.docs[0].data()} as any;}

@@ -1,7 +1,7 @@
 export type SharedWork={eco:string,found:string[],bins:Record<string,string>,reasons:Record<string,string>,first:Record<string,string>|null,reflection:string,submitted:boolean,chat?:{id:string,author:string,text:string,at:string}[]};
 export type Operation={id:string,type:string,item?:string,value?:string,author?:string};
 export type Envelope={draft:SharedWork,submission:SharedWork|null,receipts:string[],revision:number};
-export const initial=(group:number):Envelope=>({draft:{eco:['sea','sea','river','river','forest','forest'][group-1],found:[],bins:{},reasons:{},first:null,reflection:'',submitted:false,chat:[]},submission:null,receipts:[],revision:0});
+export const initial=(group:number):Envelope=>({draft:{eco:'',found:[],bins:{},reasons:{},first:null,reflection:'',submitted:false,chat:[]},submission:null,receipts:[],revision:0});
 export function apply(d:SharedWork,op:Operation):SharedWork{
  const w=structuredClone(d);w.chat??=[];
  if(op.type==='find'&&op.item&&!w.found.includes(op.item)){w.found.push(op.item);w.submitted=false}
@@ -16,6 +16,7 @@ export function apply(d:SharedWork,op:Operation):SharedWork{
 export function commit(e:Envelope,ops:Operation[],validIds:string[]):Envelope{
  const next=structuredClone(e);
  for(const op of ops){if(next.receipts.includes(op.id))continue;
+  if(!next.draft.eco&&op.type!=='chat')throw new Error('선생님이 생태계를 지정할 때까지 기다려 주세요.');
   if(!['find','classify','reason','reflection','first','chat','submit'].includes(op.type))throw new Error('지원하지 않는 작업입니다.');
   if(['find','classify','reason'].includes(op.type)&&!validIds.includes(op.item||''))throw new Error('구성요소를 확인해 주세요.');
   if(op.type==='classify'&&(!['bio','non','unsure'].includes(op.value||'')||!next.draft.found.includes(op.item!)))throw new Error('조사한 요소를 분류해 주세요.');
