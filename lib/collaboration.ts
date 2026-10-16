@@ -27,7 +27,8 @@ export function commit(e:Envelope,ops:Operation[],validIds:string[]):Envelope{
    const own=next.draft.individuals?.[op.actor]||{found:[],bins:{},reasons:{},first:null,reflection:'',submitted:false,name:op.author||'모둠원'};
    commit({draft:{...own,eco:next.draft.eco},submission:null,receipts:[],revision:0},[{...op,type:op.type.slice(9)}],validIds);
    if(op.type==='personal:first'&&(own.found.length<6||own.found.some(id=>!['bio','non'].includes(own.bins[id]))))throw new Error('개인 카드를 6개 이상 두 범주로 분류해 주세요.');
-   next.draft=apply(next.draft,op);next.receipts.push(op.id);continue;
+   if(op.type==='submit'&&!next.draft.first)next.draft.first={...next.draft.bins};
+  next.draft=apply(next.draft,op);next.receipts.push(op.id);continue;
   }
   if(!next.draft.eco&&op.type!=='chat')throw new Error('선생님이 생태계를 지정할 때까지 기다려 주세요.');
   if(!['find','classify','reason','reflection','first','chat','submit'].includes(op.type))throw new Error('지원하지 않는 작업입니다.');
@@ -35,12 +36,13 @@ export function commit(e:Envelope,ops:Operation[],validIds:string[]):Envelope{
   if(op.type==='classify'&&(!['bio','non','unsure'].includes(op.value||'')||!next.draft.found.includes(op.item!)))throw new Error('조사한 요소를 분류해 주세요.');
   if((op.value?.length||0)>(op.type==='reflection'?1000:op.type==='chat'?500:300))throw new Error('입력 내용을 조금 줄여 주세요.');
   if(op.type==='submit'){
-   if(next.draft.found.length<6||!next.draft.first||!next.draft.reflection.trim()||next.draft.found.some(id=>!['bio','non'].includes(next.draft.bins[id])))throw new Error('첫 분류와 탐구 정리를 마무리해 주세요.');
+   if(next.draft.found.length<6||!next.draft.reflection.trim()||next.draft.found.some(id=>!['bio','non'].includes(next.draft.bins[id])))throw new Error('첫 분류와 탐구 정리를 마무리해 주세요.');
   }
+  if(op.type==='submit'&&!next.draft.first)next.draft.first={...next.draft.bins};
   next.draft=apply(next.draft,op);
   if(op.type==='submit')next.submission={...structuredClone(next.draft),chat:[],individuals:{}};
   next.receipts.push(op.id);
  }
  next.receipts=next.receipts.slice(-300);next.revision++;return next;
 }
-export function decode(p:any,group:number):Envelope{if(p?.draft)return p;if(p?.eco)return {...initial(group),draft:{...p,chat:p.chat||[]},submission:p.submitted?p:null};return initial(group)}
+export function decode(p:any,group:number):Envelope{if(p?.draft)return {...p,submission:p.submission||(p.draft.submitted?{...p.draft,chat:[],individuals:{}}:null)};if(p?.eco)return {...initial(group),draft:{...p,chat:p.chat||[]},submission:p.submitted?p:null};return initial(group)}

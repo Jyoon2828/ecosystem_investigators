@@ -22,3 +22,5 @@ body{font-family:'Noto Sans KR','Malgun Gothic',Arial,sans-serif}main{max-width:
 .board-reason{padding:5px 8px;font-size:16px}.compact-personal-boards .board-reason{font-size:12px;padding:2px}.compact-personal-boards .board-reason[open] p{display:block;font-size:13px;padding:3px;margin:0}.board-reason summary{cursor:pointer}
 
 @media(min-width:900px){.compact-personal-boards{grid-template-columns:repeat(3,minmax(0,1fr))}.compact-personal-boards .photo{height:38px}.compact-personal-boards .visual-bin>div{grid-template-columns:repeat(2,minmax(0,1fr))}.compact-personal-boards .visual-bin article strong{font-size:13px}}
+
+.opinion-example{padding:16px;background:#edf3df;border-radius:12px;margin:14px 0;line-height:1.8}.opinion-example p{font-size:17px}.opinion-example small{font-size:15px}.submitted-opinion{padding:18px;background:#edf3df;border-radius:12px}.submitted-opinion p{font-size:21px;white-space:pre-wrap;overflow-wrap:anywhere}
